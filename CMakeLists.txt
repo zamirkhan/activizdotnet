@@ -116,6 +116,7 @@ if(NOT DEFINED AVDN_CONFIG)
   set(AVDN_CONFIG "${AVDN_CONFIG_DEFAULT}") # CACHE?
 endif()
 
+
 # Define MUMMY_ADD_CSHARP_CONFIG so the linkresource arguments get put
 # into the response file instead of directly on the csc command line,
 # because there are too many VTK dlls to list them all on an 8K
@@ -161,6 +162,7 @@ endif()
 if(MSVC90)
   set(gccxml_compiler "msvc9")
 endif()
+SET (GCCXML_EXTRA_D_ARGS "_HAS_TR1=0")
 
 # VTK:
 #
@@ -265,6 +267,8 @@ set(AVDN_VTK_DATA_ROOT "${VTK_DIR}/ExternalData/Testing")
 # then use the public key file in the source tree to /delaysign
 # .NET assemblies...
 #
+GET_FILENAME_COMPONENT(AVDN_SNKEYFILE "${CMAKE_CURRENT_SOURCE_DIR}/activiz.snk" ABSOLUTE)
+
 set(AVDN_SNKEYFILE "" CACHE FILEPATH "Specify the SNKEY" )
 if(AVDN_SNKEYFILE STREQUAL "")
   get_filename_component(AVDN_SNKEYFILE "${ActiVizDotNet_SOURCE_DIR}/Kitware.VTK.pub.snk" ABSOLUTE)
@@ -546,19 +550,21 @@ IF(HasMyModule EQUAL -1)
 ENDIF()
 
 
-      add_custom_command(
-        OUTPUT ${ActiVizDotNet_BINARY_DIR}/xml/${cxxclass}.xml
-        COMMAND ${gccxml_EXECUTABLE}
-          -fxml=${ActiVizDotNet_BINARY_DIR}/xml/${cxxclass}.xml
-          -fxml-start=_cable_
-          ${gccxml_include_args} -DCABLE_CONFIGURATION
-          --gccxml-compiler ${gccxml_compiler}
-          ${ActiVizDotNet_BINARY_DIR}/xml/${cxxclass}_gccxml.cxx
-        DEPENDS
-          ${ActiVizDotNet_BINARY_DIR}/xml/${cxxclass}_gccxml.cxx
-          ${header}
-          ${gccxml_EXECUTABLE}
-      )
+       ADD_CUSTOM_COMMAND(
+          OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/xml/${cxxclass}.xml
+          COMMAND ${gccxml_EXECUTABLE}
+          ARGS
+            -fxml=${CMAKE_CURRENT_BINARY_DIR}/xml/${cxxclass}.xml
+            -fxml-start=_cable_
+            ${gccxml_include_args} -DCABLE_CONFIGURATION
+            --gccxml-compiler ${gccxml_compiler}
+            ${CMAKE_CURRENT_BINARY_DIR}/xml/${cxxclass}_gccxml.cxx
+            -D${GCCXML_EXTRA_D_ARGS}
+          DEPENDS
+            ${CMAKE_CURRENT_BINARY_DIR}/xml/${cxxclass}_gccxml.cxx
+            ${header}
+            ${gccxml_EXECUTABLE}
+        )
 
 #
 # *before* custom command re-arranging:
@@ -1041,7 +1047,7 @@ else()
       endif()
       target_link_libraries(Kitware.VTK.${module}.Unmanaged ${module})
       # This is odd and should be changed (by JJ)
-      target_link_libraries(Kitware.VTK.${module}.Unmanaged vtkRenderingFreeTypeOpenGL vtkRenderingFreeType vtkInteractionStyle vtkRenderingVolumeOpenGL)
+      target_link_libraries(Kitware.VTK.${module}.Unmanaged vtkRenderingFreeType vtkInteractionStyle vtkRenderingVolumeOpenGL vtkRenderingContextOpenGL)
       foreach(dep ${${module}_LINK_DEPENDS})
         if(NOT "${dep}" STREQUAL "${module}")
           if(NOT ${dep}_EXCLUDE_FROM_WRAPPING)

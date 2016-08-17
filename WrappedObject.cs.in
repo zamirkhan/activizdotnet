@@ -66,11 +66,11 @@ namespace @csharp_namespace@
         s = o.ToString();
       }
 
-      // from vtkRenderingFreeTypeOpenGL
-      using (Kitware.VTK.vtkOpenGLFreeTypeTextMapper o = Kitware.VTK.vtkOpenGLFreeTypeTextMapper.New())
-      {
-        s = o.ToString();
-      }
+      // from vtkRenderingFreeTypeOpenGL (no longer used in VTK 6.3 and forward)
+    //  using (Kitware.VTK.vtkOpenGLFreeTypeTextMapper o = Kitware.VTK.vtkOpenGLFreeTypeTextMapper.New())
+    //  {
+    //    s = o.ToString();
+    //  }
     }
   }
 }
